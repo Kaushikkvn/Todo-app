@@ -1,11 +1,4 @@
-done
-pubg
-gym 
-kaushik
-todo
-cricket
-studying
-sleeping
-coding
-chating
-lastly 
+study
+playing 
+project 
+todo app
