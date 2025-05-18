@@ -1,3 +1,4 @@
+import time
 from tkinter import Listbox
 
 from functions import get_todo,write_todo
@@ -5,7 +6,8 @@ import os
 os.environ['TCL_LIBRARY'] \
     = r'C:\Users\Kaushik\AppData\Local\Programs\Python\Python313\tcl\tcl8.6'
 import FreeSimpleGUI
-
+FreeSimpleGUI.theme("Black")
+clock=FreeSimpleGUI.Text('',key="clock")
 label=FreeSimpleGUI.Text("Type in a to-do")
 input_box=FreeSimpleGUI.InputText(tooltip="Enter todo",key="todo")
 add_button=FreeSimpleGUI.Button("Add")
@@ -18,14 +20,16 @@ exit_button=FreeSimpleGUI.Button("Exit")
 
 
 window=FreeSimpleGUI.Window('My To-Do App',
-                            layout=[[label],
+                            layout=[[clock],
+                                    [label],
                                     [input_box,add_button],
                                     [list_box,edit_button,complete_button],
                                     [exit_button]]
                             ,font=('Helvetica',20))
 
 while True:
-    event,values=window.read()
+    event,values=window.read(timeout=200)
+    window["clock"].update(value=time.strftime("%b %d, %Y %H:%M:%S"))
     match event:
         case "Add":
             todos=get_todo()
@@ -34,24 +38,33 @@ while True:
             write_todo(todos)
             window['todos'].update(values=todos)
         case "Edit":
-            todo_to_edit=values['todos'][0]
-            new_todo=values['todo']
-            todos=get_todo()
-            index=todos.index(todo_to_edit)
-            todos[index]=new_todo
-            write_todo(todos)
-            window['todos'].update(values=todos)
+            try:
+                todo_to_edit=values['todos'][0]
+                new_todo=values['todo']
+                todos=get_todo()
+                index=todos.index(todo_to_edit)
+                todos[index]=new_todo
+                write_todo(todos)
+                window['todos'].update(values=todos)
+            except IndexError:
+                FreeSimpleGUI.popup("please select the item first.",
+                                    font=('Helvetica',20))
+
         case 'todos':
             window['todo'].update(value=values['todos'][0])
         case "Complete":
-            todo_to_edit = values['todos'][0]
-            todos=get_todo()
-            todos.remove(todo_to_edit)
-            write_todo(todos)
-            window['todos'].update(values=todos)
-            window['todo'].update(value="")
+            try:
+                todo_to_edit = values['todos'][0]
+                todos=get_todo()
+                todos.remove(todo_to_edit)
+                write_todo(todos)
+                window['todos'].update(values=todos)
+                window['todo'].update(value="")
+            except IndexError:
+                FreeSimpleGUI.popup("Please select an item first.",
+                                    font=('Helvetica',20))
         case "Exit":
-            exit()
+            break
         case FreeSimpleGUI.WIN_CLOSED:
             break
 window.close()
